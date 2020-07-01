@@ -15,7 +15,7 @@
     "pluginHook": "node ./node_modules/webgme-engine/src/bin/plugin_hook.js",
     "users": "node ./node_modules/webgme-engine/src/bin/usermanager.js",
     "clean_up": "node ./node_modules/webgme-engine/src/bin/clean_up.js",
-    "webpack": "node_modules/.bin/webpack --config ./src/visualizers/widgets/MonacoEditor/monaco-languageclientbrowser/webpack.config.js"
+    "webpack": "node_modules/.bin/webpack --mode production --config ./src/visualizers/widgets/MonacoEditor/monaco-languageclientbrowser/webpack.config.js"
   },
   "version": "1.0.0",
   "peerDependencies": {
