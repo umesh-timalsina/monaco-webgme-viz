@@ -1,0 +1,1 @@
+python-language-server[all]==0.25.0

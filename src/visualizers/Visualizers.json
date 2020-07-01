@@ -1,0 +1,8 @@
+[
+  {
+    "id": "MonacoEditor",
+    "title": "MonacoEditor",
+    "panel": "panels/MonacoEditor/MonacoEditorPanel",
+    "DEBUG_ONLY": false
+  }
+]
