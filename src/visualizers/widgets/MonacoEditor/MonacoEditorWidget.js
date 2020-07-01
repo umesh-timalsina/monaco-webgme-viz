@@ -1,18 +1,16 @@
 define([
-    './monaco-languageclientbrowser/lib/index',
+    './WebgmeMonacoLanguageClient',
     'css!./styles/MonacoEditorWidget.css',
     'vs/editor/editor.main'
 ], function (
-    WebgmeClient
+    WebgmeMonacoLanguageClient
 ) {
     'use strict';
 
     var WIDGET_CLASS = 'monaco-editor';
     const LANGUAGE_ID = 'python',
-        MODEL_URI = 'inmemory://model.py',
+        MODEL_URI = 'file:///tmp/py-models/model.py',
         MONACO_URI = monaco.Uri.parse(MODEL_URI);
-
-    const { WebgmeMonacoLanguageClient } = WebgmeClient;
 
 
     function MonacoEditorWidget(logger, container, config={}) {
@@ -32,7 +30,7 @@ define([
         this._el = container;
 
         this.nodes = {};
-        // this._initialize();
+        this._initialize();
 
         this._logger.debug('ctor finished');
 
@@ -65,7 +63,7 @@ define([
             'ws://localhost:3000/python',
             {
                 language: 'python',
-                rootUri: 'inmemory://model.py',
+                rootUri: 'file:///tmp/py-models',
                 socket: {}
             }
         );
