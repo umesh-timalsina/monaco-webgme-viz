@@ -1,7 +1,7 @@
 {
   "name": "monaco-webgme-viz",
   "scripts": {
-    "start": "node app.js && npm run start-langserver",
+    "start": "node app.js",
     "prestart": "npm run start-langserver > /dev/null &",
     "start-langserver": "./node_modules/jsonrpc-ws-proxy/dist/server.js --languageServers servers.yml --port 3000",
     "test": "node ./node_modules/mocha/bin/mocha --recursive test",
