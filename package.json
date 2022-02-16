@@ -23,15 +23,13 @@
     "webgme": "^2.23.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.10.4",
-    "@babel/preset-env": "^7.10.4",
     "@rollup/plugin-commonjs": "^16.0.0",
     "@rollup/plugin-node-resolve": "^10.0.0",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.1.0",
     "eslint-plugin-svelte3": "^2.7.3",
     "mocha": "^5.2.0",
-    "rollup": "^2.3.4",
+    "rollup": "^2.57.4",
     "rollup-plugin-css-only": "^3.0.0",
     "rollup-plugin-livereload": "^2.0.0",
     "rollup-plugin-svelte": "^7.0.0",
@@ -48,6 +46,7 @@
     "monaco-yaml": "^3.2.1",
     "normalize-url": "^5.0.0",
     "reconnecting-websocket": "^4.4.0",
+    "rollup-plugin-monaco-editor": "^0.2.0",
     "vscode-ws-jsonrpc": "^0.2.0"
   }
 }

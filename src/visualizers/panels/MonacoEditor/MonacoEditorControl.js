@@ -14,6 +14,7 @@ define([
 ) {
 
     'use strict';
+    const CODE_NODE_TYPE = 'CodeNode';
 
     function MonacoEditorControl(options) {
 
@@ -25,7 +26,6 @@ define([
         this._widget = options.widget;
 
         this._currentNodeId = null;
-        this._currentNodeParentId = undefined;
 
         this._initWidgetEventHandlers();
 
@@ -37,6 +37,13 @@ define([
             // Change the current active object
             WebGMEGlobal.State.registerActiveObject(id);
         };
+
+        this._widget.onCodeChange = (code) => {
+            if (!this._currentNodeId) return;
+            this._client.startTransaction(`About the set attribute code of node with GME id ${this._currentNodeId}`);
+            this._client.setAttribute(this._currentNodeId, 'code', code);
+            this._client.completeTransaction(`Set attribute code of node with GME id ${this._currentNodeId}`);
+        };
     };
 
     /* * * * * * * * Visualizer content update callbacks * * * * * * * */
@@ -44,43 +51,28 @@ define([
     // defines the parts of the project that the visualizer is interested in
     // (this allows the browser to then only load those relevant parts).
     MonacoEditorControl.prototype.selectedObjectChanged = function (nodeId) {
-        var desc = this._getObjectDescriptor(nodeId),
-            self = this;
-
-        self._logger.debug('activeObject nodeId \'' + nodeId + '\'');
+        this._logger.debug('activeObject nodeId \'' + nodeId + '\'');
 
         // Remove current territory patterns
-        if (self._currentNodeId) {
-            self._client.removeUI(self._territoryId);
+        if (this._currentNodeId) {
+            this._client.removeUI(this._territoryId);
         }
 
-        self._currentNodeId = nodeId;
-        self._currentNodeParentId = undefined;
-
-        if (typeof self._currentNodeId === 'string') {
+        this._currentNodeId = nodeId;
+        if (typeof this._currentNodeId === 'string') {
             // Put new node's info into territory rules
-            self._selfPatterns = {};
-            self._selfPatterns[nodeId] = {children: 0};  // Territory "rule"
+            this._selfPatterns = {};
+            this._selfPatterns[nodeId] = {children: 0};  // Territory "rule"
 
-            self._widget.setTitle(desc.name.toUpperCase());
-
-            if (typeof desc.parentId === 'string') {
-                self.$btnModelHierarchyUp.show();
-            } else {
-                self.$btnModelHierarchyUp.hide();
-            }
-
-            self._currentNodeParentId = desc.parentId;
-
-            self._territoryId = self._client.addUI(self, function (events) {
-                self._eventCallback(events);
+            this._territoryId = this._client.addUI(this,  (events) => {
+                this._eventCallback(events);
             });
 
             // Update the territory
-            self._client.updateTerritory(self._territoryId, self._selfPatterns);
+            this._client.updateTerritory(this._territoryId, this._selfPatterns);
 
-            self._selfPatterns[nodeId] = {children: 1};
-            self._client.updateTerritory(self._territoryId, self._selfPatterns);
+            this._selfPatterns[nodeId] = {children: 1};
+            this._client.updateTerritory(this._territoryId, this._selfPatterns);
         }
     };
 
@@ -88,17 +80,20 @@ define([
     MonacoEditorControl.prototype._getObjectDescriptor = function (nodeId) {
         var node = this._client.getNode(nodeId),
             objDescriptor;
-        if (node) {
+
+        if (node && this.isCodeNodeType(node)) {
             objDescriptor = {
-                id: node.getId(),
-                name: node.getAttribute(nodePropertyNames.Attributes.name),
-                childrenIds: node.getChildrenIds(),
-                parentId: node.getParentId(),
-                isConnection: GMEConcepts.isConnection(nodeId)
+                language: node.getAttribute('language'),
+                code: node.getAttribute('code'),
+                schema: node.getAttribute('schema')
             };
         }
-
         return objDescriptor;
+    };
+
+    MonacoEditorControl.prototype.isCodeNodeType = function (node) {
+        const base = this._client.getNode(node.getMetaTypeId());
+        return base && base.getAttribute('name') === CODE_NODE_TYPE;
     };
 
     /* * * * * * * * Node Event Handling * * * * * * * */
@@ -154,7 +149,6 @@ define([
     /* * * * * * * * Visualizer life cycle callbacks * * * * * * * */
     MonacoEditorControl.prototype.destroy = function () {
         this._detachClientEventListeners();
-        this._removeToolbarItems();
     };
 
     MonacoEditorControl.prototype._attachClientEventListeners = function () {
@@ -168,7 +162,6 @@ define([
 
     MonacoEditorControl.prototype.onActivate = function () {
         this._attachClientEventListeners();
-        this._displayToolbarItems();
 
         if (typeof this._currentNodeId === 'string') {
             WebGMEGlobal.State.registerActiveObject(this._currentNodeId, {suppressVisualizerFromNode: true});
@@ -177,70 +170,6 @@ define([
 
     MonacoEditorControl.prototype.onDeactivate = function () {
         this._detachClientEventListeners();
-        this._hideToolbarItems();
-    };
-
-    /* * * * * * * * * * Updating the toolbar * * * * * * * * * */
-    MonacoEditorControl.prototype._displayToolbarItems = function () {
-
-        if (this._toolbarInitialized === true) {
-            for (var i = this._toolbarItems.length; i--;) {
-                this._toolbarItems[i].show();
-            }
-        } else {
-            this._initializeToolbar();
-        }
-    };
-
-    MonacoEditorControl.prototype._hideToolbarItems = function () {
-
-        if (this._toolbarInitialized === true) {
-            for (var i = this._toolbarItems.length; i--;) {
-                this._toolbarItems[i].hide();
-            }
-        }
-    };
-
-    MonacoEditorControl.prototype._removeToolbarItems = function () {
-
-        if (this._toolbarInitialized === true) {
-            for (var i = this._toolbarItems.length; i--;) {
-                this._toolbarItems[i].destroy();
-            }
-        }
-    };
-
-    MonacoEditorControl.prototype._initializeToolbar = function () {
-        var self = this,
-            toolBar = WebGMEGlobal.Toolbar;
-
-        this._toolbarItems = [];
-
-        this._toolbarItems.push(toolBar.addSeparator());
-
-        /************** Go to hierarchical parent button ****************/
-        this.$btnModelHierarchyUp = toolBar.addButton({
-            title: 'Go to parent',
-            icon: 'glyphicon glyphicon-circle-arrow-up',
-            clickFn: function (/*data*/) {
-                WebGMEGlobal.State.registerActiveObject(self._currentNodeParentId);
-            }
-        });
-        this._toolbarItems.push(this.$btnModelHierarchyUp);
-        this.$btnModelHierarchyUp.hide();
-
-        /************** Checkbox example *******************/
-
-        this.$cbShowConnection = toolBar.addCheckBox({
-            title: 'toggle checkbox',
-            icon: 'gme icon-gme_diagonal-arrow',
-            checkChangedFn: function (data, checked) {
-                self._logger.debug('Checkbox has been clicked!');
-            }
-        });
-        this._toolbarItems.push(this.$cbShowConnection);
-
-        this._toolbarInitialized = true;
     };
 
     return MonacoEditorControl;

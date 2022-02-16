@@ -4,10 +4,11 @@ import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import {terser} from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
+import monaco from "rollup-plugin-monaco-editor";
 
 const production = !process.env.ROLLUP_WATCH;
 const JOINT_DASHBOARD_ROOT = 'src/visualizers/widgets/MonacoEditor/MonacoEditorDashboard';
-
+const MONACO_PREFIX = 'node_modules/monaco-editor/esm/vs';
 
 function serve() {
     let started = false;
@@ -34,7 +35,7 @@ export default {
         sourcemap: true,
         format: 'amd',
         name: 'app',
-        file: `${JOINT_DASHBOARD_ROOT}/build/MonacoEditorDashboard.js`
+        dir: `${JOINT_DASHBOARD_ROOT}/build`,
     },
     plugins: [
         svelte({
@@ -46,7 +47,7 @@ export default {
         // we'll extract any component CSS out into
         // a separate file - better for performance
         css({output: 'MonacoEditorDashboard.css'}),
-
+        monaco(),
         // If you have external dependencies installed from
         // npm, you'll most likely need these plugins. In
         // some cases you'll need additional configuration -

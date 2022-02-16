@@ -1,3 +1,4 @@
+
 define([
     './MonacoEditorDashboard/build/MonacoEditorDashboard',
     'vs/editor/editor.main',
@@ -30,34 +31,33 @@ define([
                 monaco: monaco
             }
         });
+        this.dashboard.initialize();
+        this.dashboard.events().addEventListener('codeChanged', (event) => {
+            this.onCodeChange(event.detail.code);
+        });
     };
 
     MonacoEditorWidget.prototype.onWidgetContainerResize = function (width, height) {
         this.$editor.width(width);
         this.$editor.height(height);
-        this.dashboard.resize(width, height);
     };
 
     // Adding/Removing/Updating items
     MonacoEditorWidget.prototype.addNode = function (desc) {
-
+        if(desc){
+            this.dashboard.setEditorCode(
+                desc.code,
+                desc.language
+            );
+        }
     };
 
     MonacoEditorWidget.prototype.removeNode = function (gmeId) {
+        // this.dashboard.setDefaults();
     };
 
     MonacoEditorWidget.prototype.updateNode = function (desc) {
-    };
-
-    /* * * * * * * * Visualizer event handlers * * * * * * * */
-
-    MonacoEditorWidget.prototype.onNodeClick = function (/*id*/) {
-        // This currently changes the active node to the given id and
-        // this is overridden in the controller.
-    };
-
-    MonacoEditorWidget.prototype.onBackgroundDblClick = function () {
-        this._el.append('<div>Background was double-clicked!!</div>');
+        this.dashboard.updateEditorCode(desc.code, desc.language);
     };
 
     /* * * * * * * * Visualizer life cycle callbacks * * * * * * * */
