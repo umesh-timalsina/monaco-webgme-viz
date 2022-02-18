@@ -1,6 +1,6 @@
 
 define([
-    './MonacoEditorDashboard/build/MonacoEditorDashboard',
+    './EditorComponent/build/monaco-webgme-viz.amd',
     'vs/editor/editor.main',
     'css!./styles/MonacoEditorWidget.css',
 ], function (

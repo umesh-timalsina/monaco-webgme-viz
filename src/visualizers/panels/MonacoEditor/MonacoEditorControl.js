@@ -126,12 +126,12 @@ define([
 
     MonacoEditorControl.prototype._onLoad = function (gmeId) {
         var description = this._getObjectDescriptor(gmeId);
-        this._widget.addNode(description);
+        description? this._widget.addNode(description): null;
     };
 
     MonacoEditorControl.prototype._onUpdate = function (gmeId) {
         var description = this._getObjectDescriptor(gmeId);
-        this._widget.updateNode(description);
+        description? this._widget.updateNode(description): null;
     };
 
     MonacoEditorControl.prototype._onUnload = function (gmeId) {
