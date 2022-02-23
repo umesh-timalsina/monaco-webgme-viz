@@ -10,7 +10,6 @@ import {setDiagnosticsOptions} from 'monaco-yaml';
 export function setMonacoEnvironment() {
     self.MonacoEnvironment = window.MonacoEnvironment = {
         getWorker(_, label) {
-            console.log(label);
             if (label === 'json') {
                 return new jsonWorker();
             }
@@ -29,4 +28,23 @@ export function setMonacoEnvironment() {
             return new editorWorker();
         }
     }
+}
+
+
+export function setYAMLDiagonosticOptions(model, schemaURI) {
+    if(!schemaURI) return;
+
+    const schema = {
+        uri: schemaURI,
+        fileMatch: ["*"]
+    };
+
+    setDiagnosticsOptions({
+        validate: true,
+        enableSchemaRequest: true,
+        format: true,
+        hover: true,
+        completion: true,
+        schemas: [schema]
+    });
 }
